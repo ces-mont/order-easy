@@ -14,7 +14,7 @@ class MesasRoutes{
         this.datos ={};
     }
     crearToken = (idmesa,idcli)=>{
-        return jwt.sign({idMesa:idmesa,idCliente:idcli}, process.env.JWT_KEY, {expiresIn: process.env.JWT_LIFETIME});
+        return jwt.sign({idMesa:idmesa,idCliente:idcli}, process.env.JWT_KEY, {expiresIn: process.env.JWT_LIFE});
     }
     checkjwt = (req,res,next)=>{         
             try {
@@ -22,7 +22,7 @@ class MesasRoutes{
                 let token='';
                 if(auth && auth.toLowerCase().startsWith('bearer')){
                     token = auth.substring(7)
-                    this.datos = jwt.verify(token,process.env.JWT_KEY,{expiresIn:process.env.JWT_LIFETIME});             
+                    this.datos = jwt.verify(token,process.env.JWT_KEY,{expiresIn:process.env.JWT_LIFE});             
                 }                 
                 next()
             } catch (error) {
@@ -33,8 +33,7 @@ class MesasRoutes{
         this.router.get('/qr/:id',async(req,res)=>{
             try{
                 const hash = bcrypt.hashSync((process.env.KEY_QR+req.params.id), 10);
-                //console.log("process.env.SERVER_URL: ",process.env.SERVER_URL)
-                const QR = await qrcode.toDataURL(process.env.SERVER_URL+'/mesas/registrarse/'+req.params.id+'/'+btoa(hash))
+                const QR = await qrcode.toDataURL(process.env.SERVER+'/mesas/registrarse/'+req.params.id+'/'+btoa(hash))
                 res.status(200).send(`<div style ="display: flex; justifi-content:center; align-items:center"> <img src="${QR}"/></div>`);
                 //res.status(200).json({rta:'localhost:5000/mesas/registrarse/'+req.params.id+'/'+btoa(hash)})
             }catch(e){
@@ -43,23 +42,6 @@ class MesasRoutes{
         })
         this.router.get('/registrarse/:idMesa/:idCliente/:hash',async(req,res)=>{
             try {
-                //console.log('Before-bcrypt-> idmesa:'+req.params.idMesa+' idCli:'+req.params.idCliente+' hash:'+atob(req.params.hash))
-                /*bcrypt.compare(process.env.KEY_QR+req.params.idMesa,atob(req.params.hash), (err,resultado)=>{
-                    console.log('in compare')
-                    if (err) {
-                        console.log('hay error')
-                        console.log('Bcrypt-Error->',err)
-                        return res.status(404).send(err)
-                    }
-                    if(resultado){
-                        console.log('resultado-ok->',resultado)
-                        res.status(200).json({msj:resultado})
-                    }else{
-                        console.log('resultado-no ok->',resultado)
-                        res.status(404).json({msj:resultado})
-                    }                    
-                })*/
-
                 //let ok = bcrypt.compareSync(process.env.KEY_QR+req.params.idMesa,atob(req.params.hash))
                 if (bcrypt.compareSync(process.env.KEY_QR+req.params.idMesa , Buffer.from(req.params.hash,'base64').toString('utf8'))){
                     await Comensales.update({idMesa:req.params.idMesa,estado:'SENTADO'},{where:{idCliente:req.params.idCliente}});
@@ -194,14 +176,10 @@ class MesasRoutes{
                     })
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
                     //console.log('sentados->',JSON.stringify(sentados))
-
                     for await (let e of sentados){
                         amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
                     }
-                    /*console.log("amigos-> ",JSON.stringify(amigos)) 
-                    console.log("amigos2-> ",JSON.stringify(amigos2)) 
-                    console.log("amigos3-> ",JSON.stringify(amigos3)) */
-
+                    /*console.log("amigos-> ",JSON.stringify(amigos))  */
                     config = {
                         headers:{
                             'Content-Type':'application/json',
@@ -321,150 +299,8 @@ class MesasRoutes{
                     res.status(200).json({msg:rta.statusText}) 
                 break;
             }
-            /*await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}})
-            let sentados = await Comensales.findAll({
-                where:{
-                    [Op.and]:[
-                        {idMesa:req.params.idCMesa},
-                        {estado:{[Op.like]:'SENTADO'}}
-                    ]
-                }
-            })
-            let aceptantes = await Comensales.findAll({
-                where:{
-                    [Op.and]:[
-                        {idMesa:req.params.idCMesa},
-                        {estado:{[Op.like]:'PAGODIVIDIDO'}}
-                    ]
-                }
-            })
-            if(sentados.length==0){                
-                //ERA EL ULTIMO EN ACEPTAR => ACTUALIZAR
-                //(se pagaran todos los pedidos de la mesa)
-                await Pedidos.update({estado:'PAGANDO'},{where:{idMesa:req.params.idMesa}})
-                // Notificar que todos aceptaron:                
-                let config = {
-                    headers:{
-                        'Content-Type':'application/json',
-                        Authorization:'key='+process.env.FCBKEY
-                    }
-                }
-                let body = {
-                    registration_ids:aceptantes.map(e=>e.idFcb),
-                    notification: {
-                        title:'Pedido de cuenta',
-                        body:'Todos los comensales de la mesa han acordado en pagar el total gastado en la mesa en forma dividida'
-                    },
-                    direct_boot_ok: true
-                }
-                const rta = await axios.post(process.env.FCB_URL,body,config);
-            }
-
-            if(aceptantes.length==1){
-                //ERA EL PRIMERO => MANDAR LAS NOTIFICACIONES A LOS DEMAS
-                let invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
-                let config = {
-                    headers:{
-                        'Content-Type':'application/json',
-                        Authorization:'key='+process.env.FCBKEY
-                    }
-                }
-                let body = {
-                    registration_ids:sentados.map(e=>e.idFcb),
-                    notification: {
-                        title:'Pedido de cuenta',
-                        body:`El cliente ${invitador.dataValues.nombre} ha propuesto dividir el total de lo consumido en la mesa entre todos. (aceptar/rechazar?)`,
-                        //click_action:""
-                    },
-                    direct_boot_ok: true
-                }
-                const rta = await axios.post(process.env.FCB_URL,body,config);
-            }else{
-                //ES UNO DE LOS QUE ACEPTAlet invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
-                let config = {
-                    headers:{
-                        'Content-Type':'application/json',
-                        Authorization:'key='+process.env.FCBKEY
-                    }
-                }
-                let body = {
-                    registration_ids:aceptantes.map(e=>(e.idFcb && e.idCliente!=req.params.idCliente)),
-                    notification: {
-                        title:'Pedido de cuenta',
-                        body:`El cliente ${invitador} ha aceptado dividir el total de lo consumido en la mesa entre todos`
-                    },
-                    direct_boot_ok: true
-                }
-                const rta = await axios.post(process.env.FCB_URL,body,config);
-            }*/
-            /*let sentados = await Comensales.findAll({
-                where:{
-                    [Op.and]:[
-                        {idMesa:req.params.idMesa},
-                        {estado:{[Op.like]:'SENTADO'}}
-                    ]
-                }
-            })*/
-            //let invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
-                //console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
-                //console.log('invitador: ',JSON.stringify(invitador))
-            //let amigos=[]
-                //await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
-           /*for await (let e of sentados){
-                    //Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
-                amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
-            }
-            console.log("amigos",amigos)
-            let config = {
-                headers:{
-                    'Content-Type':'application/json',
-                    Authorization:'key='+process.env.FCBKEY
-                }
-            }
-            let body = {
-                registration_ids:amigos,//amigos.map(e=>e.idFcb),
-                notification: {
-                    title:'Pago de la cuenta',
-                    body:`El cliente ${invitador.dataValues.nombre} ha propuesto dividir Todo lo consummidoinvitado y pagará lo que has consumido`,
-                },
-                direct_boot_ok: true,
-                data:{
-                    action: "share"
-                }
-            }
-            
-            const rta = await axios.post(process.env.FCB_URL,body,config);
-            console.log("rta.status->",rta.status)
-            console.log("rta.statusText->",rta.statusText)
-            res.status(200).json({msg:rta.statusText})    */ 
         })
-        /*this.router.get('/pagar/varios/aceptar/:idMesa/:idCliente',this.checkjwt,async(req,res)=>{
-            const cantAceptaron = await Comensales.count({where:{}})
-
-            const pedidos = await Pedidos.findAll(
-                {where:{ [Op.and]:[{idCliente:req.params.idCliente},{estado:{[Op.like]:'ENTREGADO'}}]}}
-            );
-            for await(let ped of pedidos){
-                await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:ped.idPedido}})
-            }
-            req.body.pagoscli.forEach(e=>{
-                Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
-            })
-            res.status(200).json({msg:'ok'})
-        })
-        this.router.post('/pagar/desafio/:idMesa',this.checkjwt,async(req,res)=>{
-            //console.log('garping')
-            //const datos = await this.checkjwt(req)
-           // console.log('dato->',datos)
-            //console.log('cli: ',req.query.idcli)
-            req.body.pagoscli.forEach(e=>{
-                //cambiar estado de los pedidos a 'PAGADO'
-                //console.log('e:',e)
-                Pedidos.update( {estado:'PAGANDO'},{where:{idCliente:e}} )
-            })
-            res.status(200).json({msg:'ok'})
-        })
-        */
+       
         this.router.get('/entregarpedidos/:idCli',async (req,res)=>{
             try {
                 await Pedidos.update({estado:'ENTREGADO'},{where:{idCliente:req.params.idCli}})
