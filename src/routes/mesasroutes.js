@@ -325,8 +325,7 @@ class MesasRoutes{
                         registration_ids:amigos,
                         notification: {
                             title:'Desafío para pagar la cuenta',
-                            body:`${invitador.dataValues.nombre} te desafía con un juego para pagar ambas cuentas. Ve a la 
-                            seccion "Pedir la cuenta" y respnde a este desafío.`,
+                            body:`${invitador.dataValues.nombre} te desafía con un juego para pagar ambas cuentas. Ve a la seccion "Pedir la cuenta" y respnde a este desafío.`,
                         },
                         direct_boot_ok: true,
                         data:{ 
