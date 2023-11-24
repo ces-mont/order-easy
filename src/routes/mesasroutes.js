@@ -189,8 +189,9 @@ class MesasRoutes{
                     body = {
                         registration_ids:amigos,
                         notification: {
-                            title:'Pago de la cuenta',
-                            body:`${invitador.dataValues.nombre} propone dividir el gasto de la mesa, $${sum.toFixed(2).toLocaleString()} repartido entre ${sentados.length+1} ($${(sum/(sentados.length+1)).toFixed(2)} cada uno)`,
+                            title:'Pagar la cuenta',
+                            body:`${invitador.dataValues.nombre} propone dividir el gasto de la mesa ($${sum.toFixed(2).toLocaleString()}).
+                            Ve a la sección "Pedir la cuenta" para responder.`,
                         },
                         direct_boot_ok: true,
                         data:{
@@ -298,6 +299,40 @@ class MesasRoutes{
                     rta = await axios.post(process.env.FCB_URL,body,config);
                     res.status(200).json({msg:rta.statusText}) 
                 break;
+            }
+        })
+        this.router.get('/pagar/desafio/:accion/:idCli/:idRival',async(req,res)=>{
+            switch (req.params.accion){
+                case "start":
+                    let amigos=[]
+                    invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCli}})
+                    amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:req.params.idRival}})).dataValues.idFcb)
+                    //rival = await Comensales.findOne({where:{idCliente:req.params.idRival}})
+                    await Comensales.update({estado:'DESAFIANDO'},{where:{idCliente:req.params.idCli}});
+                    config = {
+                        headers:{
+                            'Content-Type':'application/json',
+                            Authorization:'key='+process.env.FCBKEY
+                        }
+                    }                    
+                    body = {
+                        registration_ids:amigos,
+                        notification: {
+                            title:'Desafío para pagar la cuenta',
+                            body:`${invitador.dataValues.nombre} te desafía con un juego para pagar ambas cuentas. Ve a la 
+                            seccion "Pedir la cuenta" y respnde a este desafío.`,
+                        },
+                        direct_boot_ok: true,
+                        data:{ action: "desafio" }
+                    }                    
+                    rta = await axios.post(process.env.FCB_URL,body,config);
+
+                    /*console.log('mensaje-->',body.notification)
+                    console.log('rta-AXIOS-->',rta.statusText)
+                    console.log("rta.config.data->",rta.config.data)*/
+
+                    res.status(200).json({msg:rta.statusText}) 
+                break;            
             }
         })
        
