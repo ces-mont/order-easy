@@ -104,6 +104,7 @@ class MesasRoutes{
         })
         this.router.post('/pagar/invitados/:idCliente',this.checkjwt, async(req,res)=>{
             try {
+                console.log('Pago-invitados')
                 let invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
                 //console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
                 //console.log('invitador: ',JSON.stringify(invitador))
@@ -113,7 +114,7 @@ class MesasRoutes{
                     Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
                     amigos.push(await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e}}))
                 }
-                console.log("amigos-> ",JSON.stringify(amigos))    
+                //console.log("amigos-> ",JSON.stringify(amigos))    
                 let config = {
                     headers:{
                         'Content-Type':'application/json',
@@ -148,7 +149,7 @@ class MesasRoutes{
             let rta;
             let sentados;
             let invitador;            
-            //console.log("pago dividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
+            console.log("pago dividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
             switch (req.params.rtaInvtacion){
                 case "start":
                     await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
@@ -302,6 +303,7 @@ class MesasRoutes{
             }
         })
         this.router.get('/pagar/desafio/:accion/:idCli/:idRival',async(req,res)=>{
+            console.log('pago-desafio')
             let config={};
             let body={};
             let rta;
