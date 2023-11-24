@@ -302,9 +302,10 @@ class MesasRoutes{
             }
         })
         this.router.get('/pagar/desafio/:accion/:idCli/:idRival',async(req,res)=>{
+            let amigos=[];
+            let invitador;
             switch (req.params.accion){
                 case "start":
-                    let amigos=[]
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCli}})
                     amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:req.params.idRival}})).dataValues.idFcb)
                     //rival = await Comensales.findOne({where:{idCliente:req.params.idRival}})
