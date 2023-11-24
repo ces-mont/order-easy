@@ -302,6 +302,9 @@ class MesasRoutes{
             }
         })
         this.router.get('/pagar/desafio/:accion/:idCli/:idRival',async(req,res)=>{
+            let config={};
+            let body={};
+            let rta;
             let amigos=[];
             let invitador;
             switch (req.params.accion){
