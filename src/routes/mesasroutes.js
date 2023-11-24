@@ -323,7 +323,11 @@ class MesasRoutes{
                             seccion "Pedir la cuenta" y respnde a este desafío.`,
                         },
                         direct_boot_ok: true,
-                        data:{ action: "desafio" }
+                        data:{ 
+                            action: "desafio",
+                            idRival: req.params.idCli,
+                            nombRival:invitador.dataValues.nombre
+                         }
                     }                    
                     rta = await axios.post(process.env.FCB_URL,body,config);
 
