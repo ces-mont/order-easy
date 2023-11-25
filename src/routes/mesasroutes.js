@@ -111,7 +111,7 @@ class MesasRoutes{
                 let amigos=[]
                 //await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
                 for await (let e of req.body.pagoscli){
-                    Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
+                    //Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
                     amigos.push(await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e}}))
                 }
                 //console.log("amigos-> ",JSON.stringify(amigos))    
