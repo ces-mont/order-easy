@@ -109,9 +109,9 @@ class MesasRoutes{
                 //console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
                 //console.log('invitador: ',JSON.stringify(invitador))
                 let amigos=[]
-                //await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
+                await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
                 for await (let e of req.body.pagoscli){
-                    //Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
+                    Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
                     amigos.push(await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e}}))
                 }
                 //console.log("amigos-> ",JSON.stringify(amigos))    
@@ -152,8 +152,7 @@ class MesasRoutes{
             console.log("pago dividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
             switch (req.params.rtaInvtacion){
                 case "start":
-                    //await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
-                    
+                    await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
                     let total = await Pedidos.findAll({
                         include:[{
                             model:Platos,
@@ -210,7 +209,7 @@ class MesasRoutes{
                     res.status(200).json({msg:rta.statusText}) 
                 break;
                 case "si":
-                    //await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
+                    await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
                     //console.log("pago dividido->si ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion)
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
                     sentados = await Comensales.findAll({
@@ -234,7 +233,7 @@ class MesasRoutes{
                     if(sentados.length==0){                
                         //ERA EL ULTIMO EN ACEPTAR => ACTUALIZAR
                         //(se pagaran todos los pedidos de la mesa)
-                        //await Pedidos.update({estado:'PAGANDO'},{where:{idMesa:req.params.idMesa}})
+                        await Pedidos.update({estado:'PAGANDO'},{where:{idMesa:req.params.idMesa}})
                         // Notificar que todos aceptaron:                                        
                         body = {
                             registration_ids:amigos,
@@ -277,7 +276,7 @@ class MesasRoutes{
                     })
                     for await (let e of sentados){
                         amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
-                        //await Comensales.update( {estado:'SENTADO'}, {where:{estado:{[Op.like]:'PAGODIVIDIDO'}}} );
+                        await Comensales.update( {estado:'SENTADO'}, {where:{estado:{[Op.like]:'PAGODIVIDIDO'}}} );
                     }
                     config = {
                         headers:{
