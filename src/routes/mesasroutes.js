@@ -191,8 +191,7 @@ class MesasRoutes{
                         registration_ids:amigos,
                         notification: {
                             title:'Pagar la cuenta',
-                            body:`${invitador.dataValues.nombre} propone dividir el gasto de la mesa ($${sum.toFixed(2).toLocaleString()}).
-                            Ve a la sección "Pedir la cuenta" para responder.`,
+                            body:`${invitador.dataValues.nombre} propone dividir el gasto de la mesa ($${sum.toFixed(2).toLocaleString()}).Ve a la sección "Pedir la cuenta" para responder.`,
                         },
                         direct_boot_ok: true,
                         data:{
@@ -204,9 +203,9 @@ class MesasRoutes{
                     }                    
                     rta = await axios.post(process.env.FCB_URL,body,config);
 
-                    console.log('mensaje-->',body.notification)
+                    //console.log('mensaje-->',body.notification)
                     console.log('rta-AXIOS-->',rta.statusText)
-                    console.log("rta.config.data->",rta.config.data)
+                    //FIXconsole.log("rta.config.data->",rta.config.data)
 
                     res.status(200).json({msg:rta.statusText}) 
                 break;
