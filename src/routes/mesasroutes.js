@@ -1,5 +1,5 @@
 const {Router} = require('express');
-const {Pedidos,Comensales,Platos,start, Mesas} = require('../model/db');
+const {Pedidos,Comensales,Platos,start, Mesas,Partidas} = require('../model/db');
 const qrcode = require('qrcode');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -313,6 +313,11 @@ class MesasRoutes{
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCli}})
                     amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:req.params.idRival}})).dataValues.idFcb)
                     //await Comensales.update({estado:'DESAFIANDO'},{where:{idCliente:req.params.idCli}});
+                    await Partidas.create({
+                        idCliente1:req.params.idCli,
+                        idCliente2:req.params.idRival,
+                        estado:'PENDIENTE'
+                    })
                     config = {
                         headers:{
                             'Content-Type':'application/json',
@@ -339,7 +344,33 @@ class MesasRoutes{
                     console.log("rta.config.data->",rta.config.data)*/
 
                     res.status(200).json({msg:rta.statusText}) 
-                break;            
+                break;        
+                case "aceptado":
+                    //idCli:el que fue desafiado y ahora acepta
+                    let partida = Partidas.findOne({where:{idCliente2:req.params.idCli}})
+                    //await Partidas.update({estado:'ACEPTADO'},{where:{idCliente2:req.params.idCli}})
+                    let jugador1=await Comensales.findOne({where:{idCliente:req.params.idCli}})
+                    let jugador2=await Comensales.findOne({where:{idCliente:req.params.idRival}})
+                    config = {
+                        headers:{
+                            'Content-Type':'application/json',
+                            Authorization:'key='+process.env.FCBKEY
+                        }
+                    }                    
+                    body = {
+                        registration_ids:[jugador1.dataValues.idFcb,jugador2.dataValues.idFcb],
+                        notification: {
+                            title:'Desafío para pagar la cuenta',
+                            body:`Preparate para jugar. Ve a la seccion "Pedir la cuenta" y comienza el desafío.`,
+                        },
+                        direct_boot_ok: true,
+                        data:{ 
+                            action: "jugar",
+                            idPartida: partida.dataValues.idPartida
+                         }
+                    }                    
+                    rta = await axios.post(process.env.FCB_URL,body,config);
+                    break;    
             }
         })
        
