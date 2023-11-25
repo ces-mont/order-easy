@@ -152,7 +152,7 @@ class MesasRoutes{
             console.log("pago dividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
             switch (req.params.rtaInvtacion){
                 case "start":
-                    await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
+                    //await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
                     
                     let total = await Pedidos.findAll({
                         include:[{
@@ -210,7 +210,7 @@ class MesasRoutes{
                     res.status(200).json({msg:rta.statusText}) 
                 break;
                 case "si":
-                    await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
+                    //await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
                     //console.log("pago dividido->si ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion)
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
                     sentados = await Comensales.findAll({
@@ -277,7 +277,7 @@ class MesasRoutes{
                     })
                     for await (let e of sentados){
                         amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
-                        await Comensales.update( {estado:'SENTADO'}, {where:{estado:{[Op.like]:'PAGODIVIDIDO'}}} );
+                        //await Comensales.update( {estado:'SENTADO'}, {where:{estado:{[Op.like]:'PAGODIVIDIDO'}}} );
                     }
                     config = {
                         headers:{
