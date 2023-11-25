@@ -204,9 +204,9 @@ class MesasRoutes{
                     }                    
                     rta = await axios.post(process.env.FCB_URL,body,config);
 
-                    /*console.log('mensaje-->',body.notification)
+                    console.log('mensaje-->',body.notification)
                     console.log('rta-AXIOS-->',rta.statusText)
-                    console.log("rta.config.data->",rta.config.data)*/
+                    console.log("rta.config.data->",rta.config.data)
 
                     res.status(200).json({msg:rta.statusText}) 
                 break;
@@ -325,7 +325,7 @@ class MesasRoutes{
                         registration_ids:amigos,
                         notification: {
                             title:'Desafío para pagar la cuenta',
-                            body:`${invitador.dataValues.nombre} te desafía con un juego para pagar ambas cuentas. Ve a la seccion "Pedir la cuenta" y respnde a este desafío.`,
+                            body:`${invitador.dataValues.nombre} te desafía con un juego para pagar ambas cuentas. Ve a la seccion "Pedir la cuenta" y responde a este desafío.`,
                         },
                         direct_boot_ok: true,
                         data:{ 
