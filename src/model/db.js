@@ -10,6 +10,12 @@ const sequelize = new Sequelize(process.env.DB_NAME,process.env.DB_USER,process.
     logging: false
 });
 
+const Partidas = sequelize.define('Partida',{
+    idPartida:{type:DataTypes.INTEGER, allowNull:false, autoIncrement:true, unique:true,primaryKey:true},
+    estado:{type:DataTypes.STRING(50)},
+    partida:{type:DataTypes.STRING(50)}
+});
+
 const Platos = sequelize.define('Plato',{
     idPlato :{type:DataTypes.INTEGER, allowNull:false, autoIncrement:true, unique:true,primaryKey:true},
     nombre:{type:DataTypes.STRING(40),allowNull:false},
@@ -47,6 +53,11 @@ const Pedidos = sequelize.define('Pedido',{
 
 const start = async()=>{
     try {
+        Partidas.belongsTo(Comensales,{foreignKey:'idCliente1'})
+        Partidas.belongsTo(Comensales,{foreignKey:'idCliente2'})
+        Comensales.hasOne(Partidas,{foreignKey:'idCliente1'})
+        Comensales.hasOne(Partidas,{foreignKey:'idCliente1'})
+
         Comensales.belongsTo(Mesas,{foreignKey:'idMesa'})
         Mesas.hasMany(Comensales,{foreignKey:'idMesa'})
 
