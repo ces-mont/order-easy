@@ -313,8 +313,7 @@ class MesasRoutes{
                 case "start":
                     invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCli}})
                     amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:req.params.idRival}})).dataValues.idFcb)
-                    //rival = await Comensales.findOne({where:{idCliente:req.params.idRival}})
-                    await Comensales.update({estado:'DESAFIANDO'},{where:{idCliente:req.params.idCli}});
+                    //await Comensales.update({estado:'DESAFIANDO'},{where:{idCliente:req.params.idCli}});
                     config = {
                         headers:{
                             'Content-Type':'application/json',
