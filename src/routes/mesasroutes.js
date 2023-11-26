@@ -40,7 +40,8 @@ class MesasRoutes{
                 return res.status(500).send();
             }
         })
-        this.router.get('/registrarse/:idMesa/:idCliente/:hash',async(req,res)=>{
+        this.router.get('/registrarse/:idMesa/:idCliente/:hash',async(req,res)=>{            
+            console.log('Mesas-registrarse--idMesa:'+req.params.idMesa+' idCliente: '+req.params.idCliente)
             try {
                 //let ok = bcrypt.compareSync(process.env.KEY_QR+req.params.idMesa,atob(req.params.hash))
                 if (bcrypt.compareSync(process.env.KEY_QR+req.params.idMesa , Buffer.from(req.params.hash,'base64').toString('utf8'))){
@@ -58,7 +59,7 @@ class MesasRoutes{
         })        
         this.router.post('/ordenar/:idMesa/:idCliente',this.checkjwt ,async(req,res)=>{
             //let peds=[]
-            //console.log('body',req.body)
+            console.log('Mesas-ordenar--idMesa:'+req.params.idMesa+' idCliente: '+req.params.idCliente)
            // const datos = await this.checkjwt(req,res);
             //console.log('datos',this.datos)
             req.body.ordenes.forEach(e => {
@@ -79,6 +80,7 @@ class MesasRoutes{
         })
 
         this.router.get('/pagar/individual/:idCliente',this.checkjwt,async(req,res)=>{
+            console.log('Mesas-pagar/individual idCliente: '+req.params.idCliente)
             try {
                 await Pedidos.update({estado:'PAGANDO'},{where:{idCliente:req.params.idCliente}})    
                 res.status(200).json({rta:'OK'})                
@@ -103,8 +105,8 @@ class MesasRoutes{
             res.status(200).json({consumo:pedidos})
         })
         this.router.post('/pagar/invitados/:idCliente',this.checkjwt, async(req,res)=>{
+            console.log('Mesas-pagar/invitados --idCliente: '+req.params.idCliente)
             try {
-                console.log('Pago-invitados')
                 let invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
                 //console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
                 //console.log('invitador: ',JSON.stringify(invitador))
@@ -149,7 +151,7 @@ class MesasRoutes{
             let rta;
             let sentados;
             let invitador;            
-            console.log("pago dividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
+            console.log("Mesas/pagoDividido ->cli: "+req.params.idCliente+" accion-> "+req.params.rtaInvtacion+ ' idmesa-> '+req.params.idMesa)
             switch (req.params.rtaInvtacion){
                 case "start":
                     await Comensales.update({estado:'PAGODIVIDIDO'},{where:{idCliente:req.params.idCliente}});
@@ -374,6 +376,7 @@ class MesasRoutes{
         })
        
         this.router.get('/entregarpedidos/:idCli',async (req,res)=>{
+            console.log('Mesas-entregarPedidos -- idCliente: '+req.params.idCliente)
             try {
                 await Pedidos.update({estado:'ENTREGADO'},{where:{idCliente:req.params.idCli}})
                 return res.status(200).json({rta:'OK'})
@@ -382,6 +385,7 @@ class MesasRoutes{
             }
         })
         this.router.get('/cerrar/:idMesa',this.checkjwt,async(req,res)=>{
+            console.log('Mesas-cerrar--idMesa:'+req.params.idMesa)
             await Mesas.update({estado:'LIBRE'},{where:{idMesa:req.params.idMesa}})
             await Pedidos.destroy({where:{idMesa:req.params.idMesa}})
             await Comensales.destroy({where:{idMesa:req.params.idMesa}})
@@ -392,6 +396,7 @@ class MesasRoutes{
             res.status(200).json({msg:'ok'})
         })
         this.router.get('/estado/:idMesa',async(req,res)=>{
+            console.log('Mesas-estado  --idMesa:'+req.params.idMesa)
             try {
                 let comensales=[]
                 let compas = await Comensales.findAll({
@@ -416,6 +421,7 @@ class MesasRoutes{
             }
         })
         this.router.get('/compas/:idMesa',async(req,res)=>{
+            console.log('Mesas-compas idMesa: '+req.params.idMesa)
             try {
                 let comensales=[]
                 let compas = await Comensales.findAll({
