@@ -9,10 +9,13 @@ class UsersRoutes{
     }
     routes(){
         this.router.get('/:nombre/:deviceid',async(req,res)=>{
+            console.log('UserRoutees--nombre: '+req.params.nombre+' deviceId: '+req.params.deviceid)
             try {
                 const cli = await Comensales.create({nombre:req.params.nombre,idFcb:req.params.deviceid,estado:'INGRESADO'});
                 const user = await Comensales.findOne({where:{idCliente:cli.dataValues.idCliente}})
-                res.status(200).send({idCliente:cli.dataValues.idCliente, llegada:user.llegada})
+                let data={idCliente:cli.dataValues.idCliente, llegada:user.llegada}
+                console.log('rta: '+JSON.stringify(data))
+                res.status(200).send(data)
             } catch (error) {
                 res.statusMessage=error.msj;
                 return res.status(error.code||500).send({rta:JSON.stringify(error.mesagge)});
