@@ -111,7 +111,7 @@ class MesasRoutes{
                 console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
                 //console.log('invitador: ',JSON.stringify(invitador))
                 let amigos=[]
-                await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
+                await Pedidos.update({estado:'PAGANDO'},{where:{idCliente:req.params.idCliente}});
                 for await (let e of req.body.pagoscli){
                     Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
                     amigos.push(await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e}}))
