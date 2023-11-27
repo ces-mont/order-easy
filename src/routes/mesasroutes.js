@@ -415,7 +415,7 @@ class MesasRoutes{
                 return res.status(500).send()
             }
         })
-        this.router.get('/pagar/:idCli',async (req,res)=>{
+        this.router.get('/clean/:idCli',async (req,res)=>{
             console.log('Mesas-pagar -- idCliente: '+req.params.idCli)
             try {
                 await Pedidos.destroy({
