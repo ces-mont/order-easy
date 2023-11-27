@@ -391,6 +391,16 @@ class MesasRoutes{
             await Comensales.destroy({where:{idMesa:req.params.idMesa}})
             res.status(200).json({msg:'ok'});
         })
+        this.router.get('/exit/:idCliente', async(req,res)=>{
+            console.log('Mesas/exit---->idCliente: '+req.params.idCliente);
+            try {
+                await Comensales.update({idMesa:null,estado:'INGRESADO'},{where:{idCliente:req.params.idCliente}});
+                await Pedidos.destroy({where:{idCliente:req.params.idCliente}})
+                return res.status(200).json({rta:'OK'})
+            } catch (error) {                
+                return res.status(500).send()
+            }
+        })
         this.router.get('/llamarmozo/:idMesa',this.checkjwt,async(req,res,next)=>{
             // No se hace nada...
             res.status(200).json({msg:'ok'})
