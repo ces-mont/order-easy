@@ -223,20 +223,26 @@ class MesasRoutes{
                             ]
                         }
                     })
-                    for await (let e of sentados){
-                        amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
-                    }
                     config = {
                         headers:{
                             'Content-Type':'application/json',
                             Authorization:'key='+process.env.FCBKEY
                         }
                     }
+                    console.log('sentados.length: ',sentados.length)
                     if(sentados.length==0){                
                         //ERA EL ULTIMO EN ACEPTAR => ACTUALIZAR
                         //(se pagaran todos los pedidos de la mesa)
                         await Pedidos.update({estado:'PAGANDO'},{where:{idMesa:req.params.idMesa}})
-                        // Notificar que todos aceptaron:                                        
+                        await Comensales.update({estado:'SENTADO'},{where:{idMesa:req.params.idMesa}})
+                        let todos=await Comensales.findAll({
+                            where:{idMesa:req.params.idMesa}
+                        })
+                        console.log('Ultimo en aceptar')
+                        for await (let e of todos){
+                            amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
+                        }
+                        // Notificar que todos aceptaron:                                                    
                         body = {
                             registration_ids:amigos,
                             notification: {
@@ -248,7 +254,10 @@ class MesasRoutes{
                                 action: "invite"
                             }
                         }
-                    }else{                                    
+                    }else{                          
+                        for await (let e of sentados){
+                            amigos.push((await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e.dataValues.idCliente}})).dataValues.idFcb)
+                        }                                
                         body = {
                             registration_ids:amigos,
                             notification: {
