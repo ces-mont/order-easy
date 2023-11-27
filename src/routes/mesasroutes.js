@@ -82,7 +82,17 @@ class MesasRoutes{
         this.router.get('/pagar/individual/:idCliente',this.checkjwt,async(req,res)=>{
             console.log('Mesas-pagar/individual idCliente: '+req.params.idCliente)
             try {
-                await Pedidos.update({estado:'PAGANDO'},{where:{idCliente:req.params.idCliente}})    
+                await Pedidos.update(
+                    {estado:'PAGANDO'},
+                    {
+                        where:{
+                            [Op.and]:[
+                                {idCliente:req.params.idCliente},
+                                {estado:{[Op.like]:'ENTREGADO'}}
+                            ]
+                        }
+                    }
+                )    
                 res.status(200).json({rta:'OK'})                
             } catch (error) {                
                 return res.status(500).send()
@@ -113,7 +123,10 @@ class MesasRoutes{
                 let amigos=[]
                 await Pedidos.update({estado:'PAGANDO'},{where:{idCliente:req.params.idCliente}});
                 for await (let e of req.body.pagoscli){
-                    Pedidos.update( {estado:'PAGANDO'},{where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} )
+                    Pedidos.update( 
+                        {estado:'PAGANDO'},
+                        {where:{[Op.and]:[{idCliente:e},{estado:'ENTREGADO'}]}} 
+                    )
                     amigos.push(await Comensales.findOne({attributes:['idFcb'],where:{idCliente:e}}))
                 }
                 //console.log("amigos-> ",JSON.stringify(amigos))    
@@ -385,9 +398,18 @@ class MesasRoutes{
         })
        
         this.router.get('/entregarpedidos/:idCli',async (req,res)=>{
-            console.log('Mesas-entregarPedidos -- idCliente: '+req.params.idCliente)
+            console.log('Mesas-entregarPedidos -- idCliente: '+req.params.idCli)
             try {
-                await Pedidos.update({estado:'ENTREGADO'},{where:{idCliente:req.params.idCli}})
+                await Pedidos.update(
+                    {estado:'ENTREGADO'},
+                    {where:{
+                        [Op.and]:[
+                            {idCliente:req.params.idCli},
+                            {estado:{[Op.like]:'PREPARANDO'}}
+                        ]
+                        }
+                    }
+                )
                 return res.status(200).json({rta:'OK'})
             } catch (error) {
                 return res.status(500).send()
