@@ -13,7 +13,7 @@ class UsersRoutes{
             try {
                 console.log('init')
                 const cli = await Comensales.create({nombre:req.params.nombre,idFcb:req.params.deviceid,estado:'INGRESADO'});
-                console.log('cli: ',cli)
+                //console.log('cli: ',cli)
                 const user = await Comensales.findOne({where:{idCliente:cli.dataValues.idCliente}})
                 let data={idCliente:cli.dataValues.idCliente, llegada:user.llegada}
                 console.log('rta: '+JSON.stringify(data))
