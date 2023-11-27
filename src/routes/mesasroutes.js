@@ -108,7 +108,7 @@ class MesasRoutes{
             console.log('Mesas-pagar/invitados --idCliente: '+req.params.idCliente)
             try {
                 let invitador = await Comensales.findOne({attributes:['nombre'],where:{idCliente:req.params.idCliente}})
-                //console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
+                console.log('body.pagoscli: ',JSON.stringify(req.body.pagoscli))
                 //console.log('invitador: ',JSON.stringify(invitador))
                 let amigos=[]
                 await Pedidos.update({estado:'PAGANDO'},{where:{idPedido:req.params.idCliente}});
