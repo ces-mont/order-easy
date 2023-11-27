@@ -393,6 +393,22 @@ class MesasRoutes{
                 return res.status(500).send()
             }
         })
+        this.router.get('/pagar/:idCli',async (req,res)=>{
+            console.log('Mesas-pagar -- idCliente: '+req.params.idCli)
+            try {
+                await Pedidos.destroy({
+                    where:{
+                        [Op.and]:[
+                            {idCliente:req.params.idCli},
+                            {estado:{[Op.like]:'PAGANDO'}}
+                        ]
+                    }
+                })
+                return res.status(200).json({rta:'OK'})
+            } catch (error) {
+                return res.status(500).send()
+            }
+        })
         this.router.get('/cerrar/:idMesa',this.checkjwt,async(req,res)=>{
             console.log('Mesas-cerrar--idMesa:'+req.params.idMesa)
             await Mesas.update({estado:'LIBRE'},{where:{idMesa:req.params.idMesa}})
