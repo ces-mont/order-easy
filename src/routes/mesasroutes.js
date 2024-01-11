@@ -441,9 +441,23 @@ class MesasRoutes{
         this.router.get('/exit/:idCliente', async(req,res)=>{
             console.log('Mesas/exit---->idCliente: '+req.params.idCliente);
             try {
-                await Comensales.update({idMesa:null,estado:'INGRESADO'},{where:{idCliente:req.params.idCliente}});
-                await Pedidos.destroy({where:{idCliente:req.params.idCliente}})
-                return res.status(200).json({rta:'OK'})
+                let noEntregados = await Pedidos.findAll({where:{
+                    [Op.and]:[
+                        {idCliente:req.params.idCliente},
+                        {estado:{[Op.like]:'PREPARANDO'}}
+                    ]
+                }})
+                let noPagados = await Pedidos.findAll({where:{
+                    [Op.and]:[
+                        {idCliente:req.params.idCliente},
+                        {estado:{[Op.like]:'ENTREGADO'}}
+                    ]
+                }})
+                if(noEntregados.length==0 && noPagados==0){
+                    await Comensales.update({idMesa:null,estado:'INGRESADO'},{where:{idCliente:req.params.idCliente}});
+                    await Pedidos.destroy({where:{idCliente:req.params.idCliente}})
+                }
+                return res.status(200).json({e:noEntregados.length,p:noPagados.length})
             } catch (error) {                
                 return res.status(500).send()
             }
