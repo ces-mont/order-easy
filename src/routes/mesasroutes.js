@@ -103,13 +103,13 @@ class MesasRoutes{
                 include:[{
                     model: Platos,
                     required: true,
-                    attributes:['idPlato','nombre','precio']
+                    attributes:['idPlato','nombre','precio','estado']
                 }],
                 attributes:['idPedido','cantidad'],
                 where:{
                     [Op.and]:[
                         {idCliente:req.params.idCliente},
-                        {estado:{[Op.like]:'ENTREGADO'}}
+                        //{estado:{[Op.like]:'ENTREGADO'}}
                     ]
                 }});
             res.status(200).json({consumo:pedidos})
