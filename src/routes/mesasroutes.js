@@ -103,15 +103,11 @@ class MesasRoutes{
                 include:[{
                     model: Platos,
                     required: true,
-                    attributes:['idPlato','nombre','precio','estado']
+                    attributes:['idPlato','nombre','precio']
                 }],
-                attributes:['idPedido','cantidad'],
-                where:{
-                    [Op.and]:[
-                        {idCliente:req.params.idCliente},
-                        //{estado:{[Op.like]:'ENTREGADO'}}
-                    ]
-                }});
+                attributes:['idPedido','cantidad','estado'],
+                where:{idCliente:req.params.idCliente}
+            });
             res.status(200).json({consumo:pedidos})
         })
         this.router.post('/pagar/invitados/:idCliente',this.checkjwt, async(req,res)=>{
