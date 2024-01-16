@@ -504,8 +504,9 @@ class MesasRoutes{
                         }],
                         where:{idCliente:cli.idCliente}
                     });
-                    if(peds.filter(e => e.estado=="ENTREGADO").length !=0){
-                        comensales.push({idCliente:cli.idCliente,nombre:cli.nombre,Pedidos:peds.filter(e => e.estado=="ENTREGADO")})
+                    //if(peds.filter(e => e.estado=="ENTREGADO").length !=0){                        
+                    if(peds.length !=0){
+                        comensales.push({idCliente:cli.idCliente,nombre:cli.nombre,Pedidos:peds})
                     }
                 }   
                 return res.status(200).json({comensales:comensales})          
